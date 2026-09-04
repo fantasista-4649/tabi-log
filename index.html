@@ -6,21 +6,19 @@
 <meta name="theme-color" content="#111827">
 <title>旅ログ</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;background:#f3f4f6;color:#111827}
-header{background:#111827;color:white;padding:18px 16px calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:5}
-h1{margin:0;font-size:22px}.sub{opacity:.75;font-size:12px;margin-top:4px}
-main{max-width:720px;margin:auto;padding:14px 14px 90px}
-.card{background:white;border-radius:16px;padding:16px;margin:10px 0;box-shadow:0 2px 10px #0000000b}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{text-align:center;padding:14px;background:#f9fafb;border-radius:14px}.num{font-size:28px;font-weight:800}.label{font-size:12px;color:#6b7280}
-button{border:0;border-radius:12px;padding:12px 14px;background:#111827;color:white;font-weight:700;font-size:14px}
-button.secondary{background:#e5e7eb;color:#111827}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-input,textarea,select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:11px;font-size:16px;background:white}textarea{min-height:90px}
-label{display:block;font-size:12px;font-weight:700;color:#4b5563;margin:10px 0 5px}
-.item{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #eee;padding:12px 0}.item:first-child{border-top:0}
-.badge{font-size:12px;background:#dcfce7;color:#166534;border-radius:999px;padding:5px 8px;white-space:nowrap}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:10}
-nav button{background:transparent;color:#4b5563;padding:8px 12px}.active{color:#111827!important;font-weight:800}
-.hidden{display:none}.muted{color:#6b7280;font-size:13px}.danger{color:#b91c1c}.photo{max-width:100%;border-radius:12px;margin-top:8px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;background:#f3f4f6;color:#111827;padding-bottom:92px}
+header{background:#111827;color:white;padding:18px 16px calc(14px + env(safe-area-inset-top));position:sticky;top:0;z-index:5}h1{margin:0;font-size:22px}.sub{opacity:.75;font-size:12px;margin-top:4px}
+main{max-width:720px;margin:auto;padding:14px}.card{background:white;border-radius:18px;padding:18px;margin:10px 0;box-shadow:0 2px 12px #0000000b}h2{margin:0 0 14px;font-size:23px}h3{margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{text-align:center;padding:15px 8px;background:#f9fafb;border-radius:14px}.num{font-size:28px;font-weight:800}.label{font-size:12px;color:#6b7280;margin-top:3px}
+button{border:0;border-radius:12px;padding:13px 15px;background:#111827;color:white;font-weight:700;font-size:15px;min-height:46px}button.secondary{background:#e5e7eb;color:#111827}button.danger{color:#b91c1c}button:active{transform:scale(.98)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1;min-width:120px}.full{width:100%}
+label{display:block;font-size:13px;font-weight:700;color:#374151;margin:13px 0 6px}label .req{color:#dc2626}input,textarea,select{width:100%;padding:13px;border:1px solid #d1d5db;border-radius:12px;font-size:16px;background:white;color:#111827}textarea{min-height:96px;resize:vertical}input[type=file]{padding:10px}
+.help{font-size:12px;color:#6b7280;margin-top:5px}.muted{color:#6b7280;font-size:13px}.hidden{display:none!important}.notice{background:#f3f4f6;border-radius:12px;padding:11px 12px;font-size:13px;color:#4b5563;margin-top:12px}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.type-btn{background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;text-align:left}.type-btn.selected{background:#111827;color:white;border-color:#111827}
+.checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.check{display:flex;align-items:center;gap:8px;padding:11px;background:#f9fafb;border-radius:11px;font-size:14px}.check input{width:20px;height:20px;padding:0}
+.photo-preview{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:9px}.photo-preview img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px}.item{border-top:1px solid #eee;padding:13px 0}.item:first-child{border-top:0}.item-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.badge{font-size:12px;background:#dcfce7;color:#166534;border-radius:999px;padding:5px 8px;white-space:nowrap}.photo{width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-top:8px}.summary{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid #eee}.summary:first-child{border-top:0}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:10}nav button{background:transparent;color:#4b5563;padding:7px 12px;min-height:auto;line-height:1.15}nav button.active{color:#111827!important;font-weight:800}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#111827;color:white;padding:11px 16px;border-radius:999px;font-size:13px;z-index:30;box-shadow:0 4px 16px #0003}.danger-text{color:#b91c1c}
+@media(max-width:390px){.choice-grid,.checkgrid{grid-template-columns:1fr}.row>*{min-width:100%}}
 </style>
 </head>
 <body>
@@ -38,75 +36,113 @@ nav button{background:transparent;color:#4b5563;padding:8px 12px}.active{color:#
 </section>
 
 <section id="add" class="hidden">
-<div class="card"><h2>➕ 旅を記録</h2>
-<label>日付</label><input id="date" type="date">
-<label>場所・城・スポット</label><input id="place" placeholder="例：岐阜城">
-<label>種類</label><select id="type"><option>100名城</option><option>続100名城</option><option>その他の城</option><option>マンホールカード</option><option>観光</option><option>食事</option><option>その他</option></select>
-<label>メモ</label><textarea id="memo" placeholder="スタンプ取得、感想、駐車場など"></textarea>
-<label>費用（円）</label><input id="cost" type="number" inputmode="numeric" placeholder="0">
-<label>写真</label><input id="photo" type="file" accept="image/*">
-<div class="row" style="margin-top:12px"><button onclick="saveEntry()">保存する</button><button class="secondary" onclick="clearForm()">クリア</button></div>
+<div class="card">
+<h2>➕ 旅を記録</h2>
+<div class="notice">まず「何を記録するか」を選んでください。城ならスタンプ・御城印、マンホールカードならカード情報を追加で入力できます。</div>
+<label>訪問日 <span class="req">＊</span></label><input id="date" type="date">
+<label>記録する種類</label>
+<div class="choice-grid" id="typeButtons"></div>
+<label>場所・名称 <span class="req">＊</span></label><input id="place" placeholder="例：岐阜城、加古川市マンホールカード">
+<div class="row">
+<div><label>都道府県</label><input id="pref" placeholder="例：岐阜県"></div>
+<div><label>市区町村</label><input id="city" placeholder="例：岐阜市"></div>
+</div>
+
+<div id="castleFields" class="hidden">
+<label>城の区分</label><select id="castleClass"><option>100名城</option><option>続100名城</option><option>その他の城</option></select>
+<label>取得状況</label>
+<div class="checkgrid">
+<label class="check"><input id="stamp" type="checkbox"> スタンプ取得</label>
+<label class="check"><input id="goshuin" type="checkbox"> 御城印取得</label>
+</div>
+</div>
+
+<div id="manholeFields" class="hidden">
+<div class="row"><div><label>マンホールカード 第何弾</label><input id="manholeSeries" placeholder="例：第23弾"></div><div><label>カード番号</label><input id="manholeNo" placeholder="例：G001"></div></div>
+<label>配布場所</label><input id="distribution" placeholder="例：○○観光案内所">
+<label class="check"><input id="manholeGet" type="checkbox"> カード取得済み</label>
+</div>
+
+<label>費用（円）</label><input id="cost" type="number" inputmode="numeric" min="0" placeholder="0">
+<label>メモ</label><textarea id="memo" placeholder="スタンプ取得、感想、駐車場、配布時間など"></textarea>
+<label>写真</label><input id="photo" type="file" accept="image/*" capture="environment">
+<div id="photoPreview" class="photo-preview"></div>
+<div class="row" style="margin-top:14px"><button onclick="saveEntry()">💾 この記録を保存</button><button class="secondary" onclick="clearForm()">クリア</button></div>
 </div></section>
 
-<section id="list" class="hidden">
-<div class="card"><h2>📚 記録一覧</h2><div id="entries"></div></div>
-</section>
+<section id="list" class="hidden"><div class="card"><h2>📚 記録一覧</h2><div id="entries"></div></div></section>
 
-<section id="settings" class="hidden">
-<div class="card"><h2>⚙️ データ管理</h2>
-<p class="muted">機種変更やバックアップのため、記録をファイルに書き出せます。</p>
-<div class="row"><button onclick="exportData()">バックアップを書き出す</button><button class="secondary" onclick="document.getElementById('importFile').click()">復元する</button></div>
-<input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-<hr>
-<button class="secondary danger" onclick="resetData()">全データを削除</button>
-</div></section>
+<section id="settings" class="hidden"><div class="card"><h2>⚙️ データ管理</h2><p class="muted">機種変更やバックアップのため、記録をファイルに書き出せます。</p><div class="row"><button onclick="exportData()">バックアップを書き出す</button><button class="secondary" onclick="document.getElementById('importFile').click()">復元する</button></div><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"><hr><button class="secondary danger" onclick="resetData()">全データを削除</button></div></section>
 </main>
-<nav>
-<button id="n-home" class="active" onclick="show('home')">🏠<br>ホーム</button>
-<button id="n-add" onclick="show('add')">➕<br>記録</button>
-<button id="n-list" onclick="show('list')">📚<br>一覧</button>
-<button id="n-settings" onclick="show('settings')">⚙️<br>設定</button>
-</nav>
+<nav><button id="n-home" class="active" onclick="show('home')">🏠<br>ホーム</button><button id="n-add" onclick="show('add')">➕<br>記録</button><button id="n-list" onclick="show('list')">📚<br>一覧</button><button id="n-settings" onclick="show('settings')">⚙️<br>設定</button></nav>
+<div id="toast" class="toast hidden"></div>
 <script>
 const KEY="tabi_log_v1";
-let data=JSON.parse(localStorage.getItem(KEY)||"[]");
-document.getElementById("date").value=new Date().toISOString().slice(0,10);
+const TYPES=["100名城","続100名城","その他の城","マンホールカード","観光","食事","その他"];
+let data=[];
+try{data=JSON.parse(localStorage.getItem(KEY)||"[]");if(!Array.isArray(data))data=[];}catch(e){data=[];}
+const $=id=>document.getElementById(id);
+
+function today(){const d=new Date();const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,"0");const day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`;}
+$("date").value=today();
+
+function initTypeButtons(){
+ $("typeButtons").innerHTML=TYPES.map(t=>`<button type="button" class="type-btn" data-type="${t}" onclick="selectType('${t}')">${icon(t)} ${t}</button>`).join("");
+ selectType("100名城");
+}
+function icon(t){return {"100名城":"🏯","続100名城":"🏯","その他の城":"🏰","マンホールカード":"🕳️","観光":"📍","食事":"🍜","その他":"📝"}[t]||"📝";}
+function currentType(){const b=document.querySelector(".type-btn.selected");return b?b.dataset.type:"100名城";}
+function selectType(t){
+ document.querySelectorAll(".type-btn").forEach(b=>b.classList.toggle("selected",b.dataset.type===t));
+ $("castleFields").classList.toggle("hidden",!t.includes("城"));
+ $("manholeFields").classList.toggle("hidden",t!=="マンホールカード");
+}
 
 function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
-function show(id){
- ["home","add","list","settings"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));
- ["home","add","list","settings"].forEach(x=>document.getElementById("n-"+x).classList.toggle("active",x===id));
- if(id==="list") renderList();
+function show(id){["home","add","list","settings"].forEach(x=>$(x).classList.toggle("hidden",x!==id));["home","add","list","settings"].forEach(x=>$(`n-${x}`).classList.toggle("active",x===id));if(id==="list")renderList();window.scrollTo({top:0,behavior:"smooth"});}
+
+function compressImage(file,done){
+ if(!file){done("");return;}
+ const reader=new FileReader();reader.onload=()=>{
+  const img=new Image();img.onload=()=>{const max=1600;const scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext("2d").drawImage(img,0,0,c.width,c.height);done(c.toDataURL("image/jpeg",.82));};img.src=reader.result;
+ };reader.readAsDataURL(file);
 }
+
 function saveEntry(){
- const place=document.getElementById("place").value.trim();
- if(!place){alert("場所・城・スポットを入力してください");return;}
- const file=document.getElementById("photo").files[0];
- const finish=(photo)=>{data.unshift({id:Date.now(),date:document.getElementById("date").value,place,type:document.getElementById("type").value,memo:document.getElementById("memo").value,cost:Number(document.getElementById("cost").value||0),photo:photo||""});save();clearForm();show("list");};
- if(file){const r=new FileReader();r.onload=()=>finish(r.result);r.readAsDataURL(file)}else finish("");
+ const place=$("place").value.trim();if(!place){alert("場所・名称を入力してください");return;}
+ const type=currentType();const file=$("photo").files[0];
+ const entry={id:Date.now(),date:$("date").value||today(),place,type,pref:$("pref").value.trim(),city:$("city").value.trim(),castleClass:$("castleClass").value,stamp:$("stamp").checked,goshuin:$("goshuin").checked,manholeSeries:$("manholeSeries").value.trim(),manholeNo:$("manholeNo").value.trim(),distribution:$("distribution").value.trim(),manholeGet:$("manholeGet").checked,memo:$("memo").value.trim(),cost:Number($("cost").value||0),photo:""};
+ compressImage(file,photo=>{entry.photo=photo;data.unshift(entry);save();clearForm();toast("保存しました！");show("list");});
 }
-function clearForm(){document.getElementById("place").value="";document.getElementById("memo").value="";document.getElementById("cost").value="";document.getElementById("photo").value=""}
-function del(id){if(confirm("この記録を削除しますか？")){data=data.filter(x=>x.id!==id);save();}}
+function clearForm(){
+ $("date").value=today();$("place").value="";$("pref").value="";$("city").value="";$("castleClass").value="100名城";$("stamp").checked=false;$("goshuin").checked=false;$("manholeSeries").value="";$("manholeNo").value="";$("distribution").value="";$("manholeGet").checked=false;$("memo").value="";$("cost").value="";$("photo").value="";$("photoPreview").innerHTML="";selectType("100名城");
+}
+function previewPhoto(){const f=$("photo").files[0];$("photoPreview").innerHTML=f?`<div class="muted">📷 ${esc(f.name)} を選択中</div>`:"";}
+$("photo").addEventListener("change",previewPhoto);
+
+function del(id){if(confirm("この記録を削除しますか？")){data=data.filter(x=>x.id!==id);save();renderList();toast("削除しました");}}
 function render(){
- document.getElementById("castleCount").textContent=data.filter(x=>x.type.includes("城")).length;
- document.getElementById("manholeCount").textContent=data.filter(x=>x.type==="マンホールカード").length;
- document.getElementById("tripCount").textContent=new Set(data.map(x=>x.date)).size;
- document.getElementById("costCount").textContent="¥"+data.reduce((a,x)=>a+x.cost,0).toLocaleString();
- const r=document.getElementById("recent");
- r.innerHTML=data.length?data.slice(0,5).map(x=>`<div class="item"><div><b>${esc(x.place)}</b><br><span class="muted">${x.date}・${esc(x.type)}</span></div>${x.photo?'<span>📷</span>':''}</div>`).join(""):"まだ記録がありません。";
+ $("castleCount").textContent=data.filter(x=>x.type&&x.type.includes("城")).length;
+ $("manholeCount").textContent=data.filter(x=>x.type==="マンホールカード"&& (x.manholeGet!==false)).length;
+ $("tripCount").textContent=new Set(data.map(x=>x.date).filter(Boolean)).size;
+ $("costCount").textContent="¥"+data.reduce((a,x)=>a+Number(x.cost||0),0).toLocaleString();
+ const r=$("recent");r.innerHTML=data.length?data.slice(0,5).map(x=>`<div class="item"><div class="item-head"><div><b>${esc(x.place)}</b><br><span class="muted">${esc(x.date||"")}・${icon(x.type)} ${esc(x.type)}</span></div>${x.photo?"📷":""}</div></div>`).join(""):"まだ記録がありません。";
 }
 function renderList(){
- const e=document.getElementById("entries");
- e.innerHTML=data.length?data.map(x=>`<div class="item" style="display:block"><div class="row"><b>${esc(x.place)}</b><span class="badge">${esc(x.type)}</span></div><div class="muted">${x.date}　¥${x.cost.toLocaleString()}</div>${x.memo?`<p>${esc(x.memo)}</p>`:""}${x.photo?`<img class="photo" src="${x.photo}">`:""}<button class="secondary" onclick="del(${x.id})" style="margin-top:6px">削除</button></div>`).join(""):'<p class="muted">まだ記録がありません。</p>';
+ const e=$("entries");
+ if(!data.length){e.innerHTML='<p class="muted">まだ記録がありません。下の「➕ 記録」から追加してください。</p>';return;}
+ e.innerHTML=data.map(x=>{
+  const area=[x.pref,x.city].filter(Boolean).join(" ");
+  const castle=x.type&&x.type.includes("城")?`<div class="muted">${esc(x.castleClass||x.type)} ${x.stamp?"・⭕スタンプ": "・⬜スタンプ未取得"} ${x.goshuin?"・⭕御城印":""}</div>`:"";
+  const mh=x.type==="マンホールカード"?`<div class="muted">${esc(x.manholeSeries||"")} ${esc(x.manholeNo||"")} ${x.manholeGet?"・⭕取得済み":"・⬜未取得"}${x.distribution?"・配布："+esc(x.distribution):""}</div>`:"";
+  return `<div class="item"><div class="item-head"><div><b>${esc(x.place)}</b>${area?`<div class="muted">📍 ${esc(area)}</div>`:""}</div><span class="badge">${icon(x.type)} ${esc(x.type)}</span></div><div class="muted">${esc(x.date||"")}　¥${Number(x.cost||0).toLocaleString()}</div>${castle}${mh}${x.memo?`<p>${esc(x.memo)}</p>`:""}${x.photo?`<img class="photo" src="${x.photo}" alt="${esc(x.place)}の写真">`:""}<button class="secondary danger" onclick="del(${x.id})" style="margin-top:8px">この記録を削除</button></div>`;
+ }).join("");
 }
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function exportData(){
- const blob=new Blob([JSON.stringify(data)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tabi-log-backup.json";a.click();
-}
-function importData(ev){
- const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;data=x;save();alert("復元しました");}catch(e){alert("バックアップファイルを読み込めませんでした")}};r.readAsText(f);
-}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.remove("hidden");clearTimeout(window._toast);window._toast=setTimeout(()=>t.classList.add("hidden"),1800);}
+function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tabi-log-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;data=x;save();renderList();alert("復元しました");}catch(e){alert("バックアップファイルを読み込めませんでした")}ev.target.value="";};r.readAsText(f);}
 function resetData(){if(confirm("すべての記録を削除します。よろしいですか？")){data=[];save();renderList();}}
-render();
+initTypeButtons();render();
 </script>
 </body></html>

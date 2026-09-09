@@ -72,17 +72,16 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 <div class="stats">
 <div class="stat"><div class="stat-icon">🏯</div><div class="label">城</div><div class="num" id="castleCount">0</div><div class="unit">カ所</div></div>
 <div class="stat"><div class="stat-icon">📍</div><div class="label">スタンプ</div><div class="num" id="stampCount">0</div><div class="unit">カ所</div></div>
-<div class="stat"><div class="stat-icon">🕳️</div><div class="label">マンホールカード</div><div class="num" id="manholeCount">0</div><div class="unit">枚</div></div>
+<div class="stat"><div class="stat-icon">⛩️</div><div class="label">寺</div><div class="num" id="templeCount">0</div><div class="unit">カ所</div></div><div class="stat"><div class="stat-icon">🌸</div><div class="label">神社</div><div class="num" id="shrineCount">0</div><div class="unit">カ所</div></div>
 <div class="stat"><div class="stat-icon">🌸</div><div class="label">御城印</div><div class="num" id="goshuinCount">0</div><div class="unit">枚</div></div>
 </div>
 <div class="section-head"><div class="section-title"><span class="pin">📍</span>最近の旅の記録</div><div class="more">もっと見る　›</div></div>
 <div id="recent" class="recent-list muted">まだ記録がありません。</div>
 <div class="quick-actions">
-  <button type="button" onclick="startNew()"><span class="qa-icon">📷</span><span>写真</span></button>
-  <button type="button" onclick="startNew()"><span class="qa-icon">📍</span><span>スタンプ・御城印</span></button>
-  <button type="button" onclick="startNew();setTimeout(()=>selectType('マンホールカード'),0)"><span class="qa-icon">🕳️</span><span>マンホールカード</span></button>
-  <button type="button" onclick="startNew()"><span class="qa-icon">￥</span><span>費用・メモ</span></button>
-  <button type="button" onclick="show('settings')"><span class="qa-icon">☁️</span><span>バックアップ</span></button>
+  <button type="button" data-action="new"><span class="qa-icon">📷</span><span>写真</span></button>
+  <button type="button" data-action="new"><span class="qa-icon">📍</span><span>スタンプ・御城印</span></button>
+  <button type="button" data-action="new"><span class="qa-icon">￥</span><span>費用・メモ</span></button>
+  <button type="button" data-action="settings"><span class="qa-icon">☁️</span><span>バックアップ</span></button>
 </div>
 <div class="waves"></div>
 </div>
@@ -92,11 +91,11 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 <section id="add" class="hidden">
 <div class="card">
 <h2>➕ 旅を記録</h2>
-<div class="notice">まず「何を記録するか」を選んでください。城ならスタンプ・御城印、マンホールカードならカード情報を追加で入力できます。</div>
+<div class="notice">まず「何を記録するか」を選んでください。城ならスタンプ・御城印、寺・神社なら参拝記録を追加できます。</div>
 <label>訪問日 <span class="req">＊</span></label><input id="date" type="date">
 <label>記録する種類</label>
 <div class="choice-grid" id="typeButtons"></div>
-<label>場所・名称 <span class="req">＊</span></label><input id="place" placeholder="例：岐阜城、加古川市マンホールカード">
+<label>場所・名称 <span class="req">＊</span></label><input id="place" placeholder="例：岐阜城、○○寺、○○神社">
 <div class="row">
 <div><label>都道府県</label><input id="pref" placeholder="例：岐阜県"></div>
 <div><label>市区町村</label><input id="city" placeholder="例：岐阜市"></div>
@@ -111,56 +110,49 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 </div>
 </div>
 
-<div id="manholeFields" class="hidden">
-<div class="row"><div><label>マンホールカード 第何弾</label><input id="manholeSeries" placeholder="例：第23弾"></div><div><label>カード番号</label><input id="manholeNo" placeholder="例：G001"></div></div>
-<label>配布場所</label><input id="distribution" placeholder="例：○○観光案内所">
-<label class="check"><input id="manholeGet" type="checkbox"> カード取得済み</label>
 </div>
 
 <label>費用（円）</label><input id="cost" type="number" inputmode="numeric" min="0" placeholder="0">
 <label>メモ</label><textarea id="memo" placeholder="スタンプ取得、感想、駐車場、配布時間など"></textarea>
 <label>写真</label>
 <div class="row">
-  <button type="button" onclick="document.getElementById('photoCamera').click()">📷 写真を撮る</button>
-  <button type="button" class="secondary" onclick="document.getElementById('photoLibrary').click()">🖼️ 写真から選ぶ</button>
+  <button type="button" data-action="camera">📷 写真を撮る</button>
+  <button type="button" class="secondary" data-action="library">🖼️ 写真から選ぶ</button>
 </div>
-<input id="photoCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="setPhoto(event)">
-<input id="photoLibrary" type="file" accept="image/*" multiple style="display:none" onchange="setPhotos(event)">
+<input id="photoCamera" type="file" accept="image/*" capture="environment" style="display:none">
+<input id="photoLibrary" type="file" accept="image/*" multiple style="display:none">
 <div class="help">写真は複数枚追加できます。写真から選ぶ場合は複数枚をまとめて選択できます。</div>
 <div id="photoPreview" class="photo-preview"></div>
-<div class="row" style="margin-top:14px"><button onclick="saveEntry()">💾 この記録を保存</button><button class="secondary" onclick="clearForm()">クリア</button></div>
+<div class="row" style="margin-top:14px"><button data-action="save">💾 この記録を保存</button><button type="button" class="secondary" data-action="clear">クリア</button></div>
 </div></section>
 
 <section id="list" class="hidden"><div class="card"><h2>📚 記録一覧</h2><div id="entries"></div></div></section>
 
-<section id="settings" class="hidden"><div class="card"><h2>⚙️ データ管理</h2><p class="muted">機種変更やバックアップのため、記録をファイルに書き出せます。</p><div class="row"><button onclick="exportData()">バックアップを書き出す</button><button class="secondary" onclick="document.getElementById('importFile').click()">復元する</button></div><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"><hr><button class="secondary danger" onclick="resetData()">全データを削除</button></div></section>
+<section id="settings" class="hidden"><div class="card"><h2>⚙️ データ管理</h2><p class="muted">機種変更やバックアップのため、記録をファイルに書き出せます。</p><div class="row"><button data-action="export">バックアップを書き出す</button><button type="button" class="secondary" data-action="import">復元する</button></div><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"><hr><button type="button" class="secondary danger" data-action="reset">全データを削除</button></div></section>
 </main>
-<nav><button id="n-home" class="active" onclick="show('home')">🏠<br>ホーム</button><button id="n-map" onclick="show('home')">📍<br>マップ</button><button id="n-add" onclick="show('add')">🌸<br>記録する</button><button id="n-list" onclick="show('list')">☷<br>一覧</button><button id="n-settings" onclick="show('settings')">⚙️<br>設定</button></nav><button class="fab" type="button" onclick="startNew()">＋</button>
+<nav><button id="n-home" class="active" data-action="home">🏠<br>ホーム</button><button id="n-add" data-action="add">🌸<br>記録する</button><button id="n-list" data-action="list">☷<br>一覧</button><button id="n-settings" data-action="settings">⚙️<br>設定</button></nav><button type="button" class="fab" type="button" data-action="new">＋</button>
 <div id="toast" class="toast hidden"></div>
 <script>
 const KEY="tabi_log_v1";
-const TYPES=["100名城","続100名城","その他の城","マンホールカード","観光","食事","その他"];
+const TYPES=["100名城","続100名城","その他の城","寺","神社","観光","食事","その他"];
 let data=[];
 let editId=null;
 try{data=JSON.parse(localStorage.getItem(KEY)||"[]");if(!Array.isArray(data))data=[];}catch(e){data=[];}
 const $=id=>document.getElementById(id);
 
 function today(){const d=new Date();const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,"0");const day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`;}
-$("date").value=today();
-
 function initTypeButtons(){
- $("typeButtons").innerHTML=TYPES.map(t=>`<button type="button" class="type-btn" data-type="${t}" onclick="selectType('${t}')">${icon(t)} ${t}</button>`).join("");
+ $("typeButtons").innerHTML=TYPES.map(t=>`<button type="button" class="type-btn" data-type="${t}" >${icon(t)} ${t}</button>`).join("");
  selectType("100名城");
 }
-function icon(t){return {"100名城":"🏯","続100名城":"🏯","その他の城":"🏰","マンホールカード":"🕳️","観光":"📍","食事":"🍜","その他":"📝"}[t]||"📝";}
+function icon(t){return {"100名城":"🏯","続100名城":"🏯","その他の城":"🏰","寺":"⛩️","神社":"🌸","観光":"📍","食事":"🍜","その他":"📝"}[t]||"📝";}
 function currentType(){const b=document.querySelector(".type-btn.selected");return b?b.dataset.type:"100名城";}
 function selectType(t){
  document.querySelectorAll(".type-btn").forEach(b=>b.classList.toggle("selected",b.dataset.type===t));
  $("castleFields").classList.toggle("hidden",!t.includes("城"));
- $("manholeFields").classList.toggle("hidden",t!=="マンホールカード");
 }
 
-function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));render();return true;}catch(e){alert("保存できませんでした。写真の枚数を減らして再度お試しください。");return false;}}
 function show(id){["home","add","list","settings"].forEach(x=>$(x).classList.toggle("hidden",x!==id));["home","add","list","settings"].forEach(x=>$(`n-${x}`).classList.toggle("active",x===id));$("n-map").classList.remove("active");if(id==="list")renderList();window.scrollTo({top:0,behavior:"smooth"});}
 
 function compressImage(file,done){
@@ -207,14 +199,14 @@ function setPhotos(e){
 function removePhoto(i){photoData.splice(i,1);renderPhotoPreview();}
 function renderPhotoPreview(){
   $("photoPreview").innerHTML=photoData.length
-    ? photoData.map((src,i)=>`<div class="photo-thumb"><img src="${src}" alt="写真${i+1}"><button type="button" class="photo-remove" onclick="removePhoto(${i})">×</button></div>`).join("")
+    ? photoData.map((src,i)=>`<div class="photo-thumb"><img src="${src}" alt="写真${i+1}"><button type="button" class="photo-remove" data-remove-photo="${i}">×</button></div>`).join("")
     : "";
 }
 let photoData=[];
 function saveEntry(){
  const place=$("place").value.trim();if(!place){alert("場所・名称を入力してください");return;}
  const type=currentType();
- const entry={id:editId??Date.now(),date:$("date").value||today(),place,type,pref:$("pref").value.trim(),city:$("city").value.trim(),castleClass:$("castleClass").value,stamp:$("stamp").checked,goshuin:$("goshuin").checked,manholeSeries:$("manholeSeries").value.trim(),manholeNo:$("manholeNo").value.trim(),distribution:$("distribution").value.trim(),manholeGet:$("manholeGet").checked,memo:$("memo").value.trim(),cost:Number($("cost").value||0),photo:photoData[0]||"",photos:photoData.slice()};
+ const entry={id:editId??Date.now(),date:$("date").value||today(),place,type,pref:$("pref").value.trim(),city:$("city").value.trim(),castleClass:$("castleClass").value,stamp:$("stamp").checked,goshuin:$("goshuin").checked,memo:$("memo").value.trim(),cost:Number($("cost").value||0),photo:photoData[0]||"",photos:photoData.slice()};
  if(editId!==null){const i=data.findIndex(x=>x.id===editId);if(i>=0)data[i]=entry;else data.unshift(entry);}else data.unshift(entry);
  save();clearForm();toast(editId!==null?"記録を更新しました！":"保存しました！");show("list");
 }
@@ -232,9 +224,10 @@ function del(id){if(confirm("この記録を削除しますか？")){data=data.f
 function render(){
  $("castleCount").textContent=data.filter(x=>x.type&&x.type.includes("城")).length;
  $("stampCount").textContent=data.filter(x=>x.stamp).length;
- $("manholeCount").textContent=data.filter(x=>x.type==="マンホールカード"&&(x.manholeGet!==false)).length;
+ $("templeCount").textContent=data.filter(x=>x.type==="寺").length;
+  $("shrineCount").textContent=data.filter(x=>x.type==="神社").length;
  $("goshuinCount").textContent=data.filter(x=>x.goshuin).length;
- const r=$("recent");r.innerHTML=data.length?data.slice(0,5).map(x=>`<div class="recent-row">${(x.photos?.[0]||x.photo)?`<img class="recent-photo" src="${x.photos?.[0]||x.photo}" alt="">`:`<span class="recent-photo" style="display:inline-flex;align-items:center;justify-content:center;background:#f2dfc8">${icon(x.type)}</span>`}<div class="recent-main"><b>${esc(x.place)}</b><div class="muted">${esc(x.date||"")} ・ ${esc(x.pref||"")} ${esc(x.city||"")}</div><div class="recent-tags"><span class="mini-tag">${esc(x.type)}</span>${x.stamp?`<span class="mini-tag green">スタンプ</span>`:""}${x.goshuin?`<span class="mini-tag purple">御城印</span>`:""}${x.type==="マンホールカード"?`<span class="mini-tag blue">マンホールカード</span>`:""}</div></div><span class="recent-arrow">›</span></div>`).join(""):"まだ記録がありません。";
+ const r=$("recent");r.innerHTML=data.length?data.slice(0,5).map(x=>`<div class="recent-row">${(x.photos?.[0]||x.photo)?`<img class="recent-photo" src="${x.photos?.[0]||x.photo}" alt="">`:`<span class="recent-photo" style="display:inline-flex;align-items:center;justify-content:center;background:#f2dfc8">${icon(x.type)}</span>`}<div class="recent-main"><b>${esc(x.place)}</b><div class="muted">${esc(x.date||"")} ・ ${esc(x.pref||"")} ${esc(x.city||"")}</div><div class="recent-tags"><span class="mini-tag">${esc(x.type)}</span>${x.stamp?`<span class="mini-tag green">スタンプ</span>`:""}${x.goshuin?`<span class="mini-tag purple">御城印</span>`:""}</div></div><span class="recent-arrow">›</span></div>`).join(""):"まだ記録がありません。";
 }
 function renderList(){
  const e=$("entries");
@@ -242,8 +235,7 @@ function renderList(){
  e.innerHTML=data.map(x=>{
   const area=[x.pref,x.city].filter(Boolean).join(" ");
   const castle=x.type&&x.type.includes("城")?`<div class="muted">${esc(x.castleClass||x.type)} ${x.stamp?"・⭕スタンプ": "・⬜スタンプ未取得"} ${x.goshuin?"・⭕御城印":""}</div>`:"";
-  const mh=x.type==="マンホールカード"?`<div class="muted">${esc(x.manholeSeries||"")} ${esc(x.manholeNo||"")} ${x.manholeGet?"・⭕取得済み":"・⬜未取得"}${x.distribution?"・配布："+esc(x.distribution):""}</div>`:"";
-  return `<div class="item"><div class="item-head"><div><b>${esc(x.place)}</b>${area?`<div class="muted">📍 ${esc(area)}</div>`:""}</div><span class="badge">${icon(x.type)} ${esc(x.type)}</span></div><div class="muted">${esc(x.date||"")}　¥${Number(x.cost||0).toLocaleString()}</div>${castle}${mh}${x.memo?`<p>${esc(x.memo)}</p>`:""}${(x.photos?.length||x.photo)?`<div class="photo-gallery">${(x.photos?.length?x.photos:[x.photo]).map((src,i)=>`<img class="photo" src="${src}" alt="${esc(x.place)}の写真${i+1}">`).join("")}</div>`:""}<div class="edit-actions"><button type="button" onclick="startEdit(${x.id})">✏️ 編集</button><button type="button" class="secondary danger" onclick="del(${x.id})">🗑️ 削除</button></div></div>`;
+  return `<div class="item"><div class="item-head"><div><b>${esc(x.place)}</b>${area?`<div class="muted">📍 ${esc(area)}</div>`:""}</div><span class="badge">${icon(x.type)} ${esc(x.type)}</span></div><div class="muted">${esc(x.date||"")}　¥${Number(x.cost||0).toLocaleString()}</div>${castle}${x.memo?`<p>${esc(x.memo)}</p>`:""}${(x.photos?.length||x.photo)?`<div class="photo-gallery">${(x.photos?.length?x.photos:[x.photo]).map((src,i)=>`<img class="photo" src="${src}" alt="${esc(x.place)}の写真${i+1}">`).join("")}</div>`:""}<div class="edit-actions"><button type="button" data-edit-id="${x.id}">✏️ 編集</button><button type="button" class="secondary danger" data-delete-id="${x.id}">🗑️ 削除</button></div></div>`;
  }).join("");
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
@@ -251,6 +243,34 @@ function toast(msg){const t=$("toast");t.textContent=msg;t.classList.remove("hid
 function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tabi-log-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;data=x;save();renderList();alert("復元しました");}catch(e){alert("バックアップファイルを読み込めませんでした")}ev.target.value="";};r.readAsText(f);}
 function resetData(){if(confirm("すべての記録を削除します。よろしいですか？")){data=[];save();renderList();}}
-initTypeButtons();render();
+
+// 安全なイベント処理（iPhoneのローカルHTMLでも反応しやすい方式）
+document.addEventListener("click",function(ev){
+  const b=ev.target.closest("button");
+  if(!b) return;
+  if(b.dataset.type){ selectType(b.dataset.type); return; }
+  const a=b.dataset.action;
+  if(a==="new"){startNew();return;}
+  if(a==="settings"){show("settings");return;}
+  if(a==="home"){show("home");return;}
+  if(a==="add"){show("add");return;}
+  if(a==="list"){show("list");return;}
+  if(a==="camera"){$("photoCamera").click();return;}
+  if(a==="library"){$("photoLibrary").click();return;}
+  if(a==="save"){saveEntry();return;}
+  if(a==="clear"){clearForm();return;}
+  if(a==="export"){exportData();return;}
+  if(a==="import"){$("importFile").click();return;}
+  if(a==="reset"){resetData();return;}
+  if(b.dataset.editId){startEdit(Number(b.dataset.editId));return;}
+  if(b.dataset.deleteId){del(Number(b.dataset.deleteId));return;}
+  if(b.dataset.removePhoto!==undefined){removePhoto(Number(b.dataset.removePhoto));return;}
+});
+function boot(){
+  try{$("date").value=today();}catch(e){}
+  initTypeButtons();
+  render();
+}
+boot();
 </script>
 </body></html>

@@ -73,7 +73,7 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 <div class="stat"><div class="stat-icon">🏯</div><div class="label">城</div><div class="num" id="castleCount">0</div><div class="unit">カ所</div></div>
 <div class="stat"><div class="stat-icon">📍</div><div class="label">スタンプ</div><div class="num" id="stampCount">0</div><div class="unit">カ所</div></div>
 <div class="stat"><div class="stat-icon">⛩️</div><div class="label">寺</div><div class="num" id="templeCount">0</div><div class="unit">カ所</div></div><div class="stat"><div class="stat-icon">🌸</div><div class="label">神社</div><div class="num" id="shrineCount">0</div><div class="unit">カ所</div></div>
-<div class="stat"><div class="stat-icon">🌸</div><div class="label">御城印</div><div class="num" id="goshuinCount">0</div><div class="unit">枚</div></div>
+<div class="stat"><div class="stat-icon">🌸</div><div class="label">御朱印</div><div class="num" id="goshuinCount">0</div><div class="unit">枚</div></div>
 </div>
 <div class="section-head"><div class="section-title"><span class="pin">📍</span>最近の旅の記録</div><button type="button" class="more" data-action="list">もっと見る　›</button></div>
 <div id="recent" class="recent-list muted">まだ記録がありません。</div>
@@ -138,7 +138,7 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 
 <section id="settings" class="hidden"><div class="card"><h2>⚙️ データ管理</h2><p class="muted">機種変更やバックアップのため、記録をファイルに書き出せます。</p><div class="row"><button data-action="export">バックアップを書き出す</button><button type="button" class="secondary" data-action="import">復元する</button></div><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"><hr><button type="button" class="secondary danger" data-action="reset">全データを削除</button></div></section>
 </main>
-<nav><button id="n-home" class="active" data-action="home">🏠<br>ホーム</button><button id="n-add" data-action="add">🌸<br>記録する</button><button id="n-list" data-action="list">☷<br>一覧</button><button id="n-settings" data-action="settings">⚙️<br>設定</button></nav><button type="button" class="fab" type="button" data-action="new">＋</button>
+<nav><button id="n-home" class="active" data-action="home">🏠<br>ホーム</button><button id="n-add" data-action="add">🌸<br>記録する</button><button id="n-list" data-action="list">☷<br>一覧</button><button id="n-settings" data-action="settings">⚙️<br>設定</button></nav><button type="button" class="fab" data-action="new">＋</button>
 <div id="toast" class="toast hidden"></div>
 <script>
 /* 旅ログ v2 - iPhone/GitHub Pages安定版 */
@@ -155,13 +155,56 @@ function icon(t){return {"100名城":"🏯","続100名城":"🏯","その他の�
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 function toast(msg){const t=$("toast");if(!t)return;t.textContent=msg;t.classList.remove("hidden");clearTimeout(window._toast);window._toast=setTimeout(()=>t.classList.add("hidden"),1800);}
 
+function parseStored(raw){
+  if(!raw)return null;
+  try{
+    const x=JSON.parse(raw);
+    if(Array.isArray(x))return x;
+    if(x && Array.isArray(x.entries))return x.entries;
+    if(x && Array.isArray(x.data))return x.data;
+    if(x && Array.isArray(x.records))return x.records;
+  }catch(e){}
+  return null;
+}
+function looksLikeTravelData(arr){
+  if(!Array.isArray(arr)||!arr.length)return false;
+  return arr.some(x=>{
+    if(!x||typeof x!=="object")return false;
+    const keys=Object.keys(x);
+    const hasPlace=keys.some(k=>["place","name","title","location"].includes(k)) || !!x.place || !!x.name;
+    const hasTravelField=keys.some(k=>["date","type","memo","photos","photo","pref","city","stamp","goshuin","cost"].includes(k));
+    return hasPlace && hasTravelField;
+  });
+}
 function loadData(){
-  let raw=null;
-  try{raw=localStorage.getItem(KEY);if(!raw){for(const k of OLD_KEYS){raw=localStorage.getItem(k);if(raw){break;}}}}
-  catch(e){raw=null;}
-  try{const x=raw?JSON.parse(raw):[];data=Array.isArray(x)?x:[];}catch(e){data=[];}
-  data=data.map(normalizeEntry);
-  try{if(data.length && !localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}
+  let found=null, foundKey="";
+  try{
+    // まず現在の保存先。空配列しか入っていない場合は旧データも探す。
+    const current=parseStored(localStorage.getItem(KEY));
+    if(looksLikeTravelData(current)){found=current;foundKey=KEY;}
+    if(!found){
+      for(const k of OLD_KEYS){
+        const arr=parseStored(localStorage.getItem(k));
+        if(looksLikeTravelData(arr)){found=arr;foundKey=k;break;}
+      }
+    }
+    // それでも見つからなければ、旅ログらしいキーを自動探索。
+    if(!found){
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i)||"";
+        if(k===KEY||OLD_KEYS.includes(k))continue;
+        if(!/(tabi|travel|旅|log)/i.test(k))continue;
+        const arr=parseStored(localStorage.getItem(k));
+        if(looksLikeTravelData(arr)){found=arr;foundKey=k;break;}
+      }
+    }
+  }catch(e){}
+
+  data=(found||[]).map(normalizeEntry);
+  // 旧保存先から読み出せたら、新しい保存先へコピーして今後も同じデータを使う。
+  try{
+    if(data.length && foundKey!==KEY)localStorage.setItem(KEY,JSON.stringify(data));
+  }catch(e){toast("データ移行に失敗しました");}
 }
 function normalizeEntry(x){
   const y=(x&&typeof x==="object")?x:{};

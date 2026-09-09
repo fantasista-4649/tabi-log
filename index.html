@@ -112,6 +112,14 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 
 </div>
 
+<div id="templeFields" class="hidden">
+<label>参拝・御朱印</label>
+<label class="check"><input id="templeGoshuin" type="checkbox"> 御朱印を取得</label>
+</div>
+<div id="shrineFields" class="hidden">
+<label>参拝・御朱印</label>
+<label class="check"><input id="shrineGoshuin" type="checkbox"> 御朱印を取得</label>
+</div>
 <label>費用（円）</label><input id="cost" type="number" inputmode="numeric" min="0" placeholder="0">
 <label>メモ</label><textarea id="memo" placeholder="スタンプ取得、感想、駐車場、配布時間など"></textarea>
 <label>写真</label>
@@ -135,7 +143,7 @@ nav{background:linear-gradient(180deg,#e51f2a,#c91624);height:82px;padding:7px 4
 <script>
 /* 旅ログ v2 - iPhone/GitHub Pages安定版 */
 const KEY="tabi_log_v2";
-const OLD_KEYS=["tabi_log_v1"];
+const OLD_KEYS=["tabi_log_v1","tabi_log","tabi-log","tabi_log_data","travelLog","travel_log","tabiLog","tabi-log-data"];
 const TYPES=["100名城","続100名城","その他の城","寺","神社","観光","食事","その他"];
 let data=[];
 let editId=null;
@@ -153,10 +161,11 @@ function loadData(){
   catch(e){raw=null;}
   try{const x=raw?JSON.parse(raw):[];data=Array.isArray(x)?x:[];}catch(e){data=[];}
   data=data.map(normalizeEntry);
+  try{if(data.length && !localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}
 }
 function normalizeEntry(x){
   const y=(x&&typeof x==="object")?x:{};
-  return {id:y.id??Date.now()+Math.random(),date:y.date||today(),place:String(y.place||""),type:TYPES.includes(y.type)?y.type:"その他",pref:String(y.pref||""),city:String(y.city||""),castleClass:y.castleClass||"100名城",stamp:!!y.stamp,goshuin:!!y.goshuin,memo:String(y.memo||""),cost:Number(y.cost)||0,photos:Array.isArray(y.photos)?y.photos.filter(Boolean):(y.photo?[y.photo]:[])};
+  return {id:y.id??Date.now()+Math.random(),date:y.date||today(),place:String(y.place||y.name||""),type:TYPES.includes(y.type)?y.type:"その他",pref:String(y.pref||""),city:String(y.city||""),castleClass:y.castleClass||"100名城",stamp:!!y.stamp,goshuin:!!y.goshuin,templeGoshuin:!!(y.templeGoshuin??y.goshuin),shrineGoshuin:!!(y.shrineGoshuin??y.goshuin),memo:String(y.memo||""),cost:Number(y.cost)||0,photos:Array.isArray(y.photos)?y.photos.filter(Boolean):(y.photo?[y.photo]:[])};
 }
 function persist(){
   try{localStorage.setItem(KEY,JSON.stringify(data));return true;}
@@ -171,7 +180,11 @@ function initTypeButtons(){
 function currentType(){const b=document.querySelector(".type-btn.selected");return b?b.dataset.type:"100名城";}
 function selectType(t){
   document.querySelectorAll(".type-btn").forEach(b=>b.classList.toggle("selected",b.dataset.type===t));
-  $("castleFields").classList.toggle("hidden",!String(t).includes("城"));
+  const isCastle=String(t).includes("城");
+  $("castleFields").classList.toggle("hidden",!isCastle);
+  const isTemple=t==="寺", isShrine=t==="神社";
+  $("templeFields").classList.toggle("hidden",!isTemple);
+  $("shrineFields").classList.toggle("hidden",!isShrine);
 }
 function show(id){
   ["home","add","list","settings"].forEach(x=>{const el=$(x);if(el)el.classList.toggle("hidden",x!==id);const nav=$("n-"+x);if(nav)nav.classList.toggle("active",x===id);});
@@ -216,7 +229,7 @@ function bindPhotoInputs(){
 function saveEntry(){
   const place=$("place").value.trim();
   if(!place){alert("場所・名称を入力してください");$("place").focus();return;}
-  const entry={id:editId!==null?editId:(Date.now()+Math.random()),date:$("date").value||today(),place,type:currentType(),pref:$("pref").value.trim(),city:$("city").value.trim(),castleClass:$("castleClass").value,stamp:$("stamp").checked,goshuin:$("goshuin").checked,memo:$("memo").value.trim(),cost:Math.max(0,Number($("cost").value)||0),photos:photoData.slice()};
+  const type=currentType();const templeGoshuin=type==="寺"&&$("templeGoshuin").checked;const shrineGoshuin=type==="神社"&&$("shrineGoshuin").checked;const entry={id:editId!==null?editId:(Date.now()+Math.random()),date:$("date").value||today(),place,type,pref:$("pref").value.trim(),city:$("city").value.trim(),castleClass:$("castleClass").value,stamp:$("stamp").checked,goshuin:$("goshuin").checked||templeGoshuin||shrineGoshuin,templeGoshuin,shrineGoshuin,memo:$("memo").value.trim(),cost:Math.max(0,Number($("cost").value)||0),photos:photoData.slice()};
   const old=data.slice();
   if(editId!==null){const i=data.findIndex(x=>String(x.id)===String(editId));if(i>=0)data[i]=entry;else data.unshift(entry);}else data.unshift(entry);
   if(!save()){data=old;return;}
@@ -225,11 +238,11 @@ function saveEntry(){
 function startNew(){clearForm();show("add");}
 function startEdit(id){
   const x=data.find(v=>String(v.id)===String(id));if(!x)return;
-  editId=x.id;$("date").value=x.date||today();$("place").value=x.place||"";$("pref").value=x.pref||"";$("city").value=x.city||"";$("castleClass").value=x.castleClass||"100名城";$("stamp").checked=!!x.stamp;$("goshuin").checked=!!x.goshuin;$("memo").value=x.memo||"";$("cost").value=x.cost||"";
+  editId=x.id;$("date").value=x.date||today();$("place").value=x.place||"";$("pref").value=x.pref||"";$("city").value=x.city||"";$("castleClass").value=x.castleClass||"100名城";$("stamp").checked=!!x.stamp;$("goshuin").checked=!!x.goshuin;$("templeGoshuin").checked=!!x.templeGoshuin||((x.type==="寺")&&!!x.goshuin);$("shrineGoshuin").checked=!!x.shrineGoshuin||((x.type==="神社")&&!!x.goshuin);$("memo").value=x.memo||"";$("cost").value=x.cost||"";
   photoData=Array.isArray(x.photos)?x.photos.slice():(x.photo?[x.photo]:[]);selectType(x.type||"100名城");renderPhotoPreview();$("add").querySelector("h2").textContent="✏️ 記録を編集";show("add");
 }
 function clearForm(){
-  editId=null;$("add").querySelector("h2").textContent="➕ 旅を記録";$("date").value=today();$("place").value="";$("pref").value="";$("city").value="";$("castleClass").value="100名城";$("stamp").checked=false;$("goshuin").checked=false;$("memo").value="";$("cost").value="";photoData=[];$("photoPreview").innerHTML="";selectType("100名城");
+  editId=null;$("add").querySelector("h2").textContent="➕ 旅を記録";$("date").value=today();$("place").value="";$("pref").value="";$("city").value="";$("castleClass").value="100名城";$("stamp").checked=false;$("goshuin").checked=false;$("templeGoshuin").checked=false;$("shrineGoshuin").checked=false;$("memo").value="";$("cost").value="";photoData=[];$("photoPreview").innerHTML="";selectType("100名城");
 }
 function del(id){if(!confirm("この記録を削除しますか？"))return;const old=data.slice();data=data.filter(x=>String(x.id)!==String(id));if(save())toast("削除しました");else data=old;renderList();}
 
@@ -238,17 +251,17 @@ function render(){
   $("stampCount").textContent=data.filter(x=>x.stamp).length;
   $("templeCount").textContent=data.filter(x=>x.type==="寺").length;
   $("shrineCount").textContent=data.filter(x=>x.type==="神社").length;
-  $("goshuinCount").textContent=data.filter(x=>x.goshuin).length;
+  $("goshuinCount").textContent=data.filter(x=>x.goshuin||x.templeGoshuin||x.shrineGoshuin).length;
   $("recent").innerHTML=data.length?data.slice(0,5).map(x=>{
-    const p=x.photos?.[0];return `<div class="recent-row"><div class="recent-photo" style="display:flex;align-items:center;justify-content:center;background:#f2dfc8;overflow:hidden">${p?`<img src="${p}" alt="" style="width:100%;height:100%;object-fit:cover">`:icon(x.type)}</div><div class="recent-main"><b>${esc(x.place)}</b><div class="muted">${esc(x.date||"")} ・ ${esc(x.pref||"")} ${esc(x.city||"")}</div><div class="recent-tags"><span class="mini-tag">${esc(x.type)}</span>${x.stamp?`<span class="mini-tag green">スタンプ</span>`:""}${x.goshuin?`<span class="mini-tag purple">御城印</span>`:""}</div></div><span class="recent-arrow">›</span></div>`;
+    const p=x.photos?.[0];return `<div class="recent-row"><div class="recent-photo" style="display:flex;align-items:center;justify-content:center;background:#f2dfc8;overflow:hidden">${p?`<img src="${p}" alt="" style="width:100%;height:100%;object-fit:cover">`:icon(x.type)}</div><div class="recent-main"><b>${esc(x.place)}</b><div class="muted">${esc(x.date||"")} ・ ${esc(x.pref||"")} ${esc(x.city||"")}</div><div class="recent-tags"><span class="mini-tag">${esc(x.type)}</span>${x.stamp?`<span class="mini-tag green">スタンプ</span>`:""}${(x.goshuin||x.templeGoshuin||x.shrineGoshuin)?`<span class="mini-tag purple">御朱印${x.type.includes("城")?"・御城印":""}</span>`:""}</div></div><span class="recent-arrow">›</span></div>`;
   }).join(""):"まだ記録がありません。";
 }
 function renderList(){
   const q=($("searchInput")?.value||"").trim().toLowerCase();
   const rows=data.filter(x=>!q||[x.place,x.type,x.pref,x.city,x.memo,x.castleClass].join(" ").toLowerCase().includes(q));
   $("entries").innerHTML=rows.length?rows.map(x=>{
-    const area=[x.pref,x.city].filter(Boolean).join(" ");const castle=x.type?.includes("城")?`<div class="muted">${esc(x.castleClass||x.type)} ${x.stamp?"・⭕スタンプ":"・⬜スタンプ未取得"} ${x.goshuin?"・⭕御城印":""}</div>`:"";const photos=x.photos?.length?x.photos:(x.photo?[x.photo]:[]);
-    return `<div class="item"><div class="item-head"><div><b>${esc(x.place)}</b>${area?`<div class="muted">📍 ${esc(area)}</div>`:""}</div><span class="badge">${icon(x.type)} ${esc(x.type)}</span></div><div class="muted">${esc(x.date||"")}　¥${Number(x.cost||0).toLocaleString()}</div>${castle}${x.memo?`<p>${esc(x.memo)}</p>`:""}${photos.length?`<div class="photo-gallery">${photos.map((src,i)=>`<img class="photo" src="${src}" alt="${esc(x.place)}の写真${i+1}">`).join("")}</div>`:""}<div class="edit-actions"><button type="button" data-edit-id="${x.id}">✏️ 編集</button><button type="button" class="secondary danger" data-delete-id="${x.id}">🗑️ 削除</button></div></div>`;
+    const area=[x.pref,x.city].filter(Boolean).join(" ");const castle=x.type?.includes("城")?`<div class="muted">${esc(x.castleClass||x.type)} ${x.stamp?"・⭕スタンプ":"・⬜スタンプ未取得"} ${x.goshuin?"・⭕御城印":""}</div>`:"";const templeShrine=(x.type==="寺"||x.type==="神社")?(x.goshuin||x.templeGoshuin||x.shrineGoshuin?"・⭕御朱印取得":"・⬜御朱印未取得"):"";const photos=x.photos?.length?x.photos:(x.photo?[x.photo]:[]);
+    return `<div class="item"><div class="item-head"><div><b>${esc(x.place)}</b>${area?`<div class="muted">📍 ${esc(area)}</div>`:""}</div><span class="badge">${icon(x.type)} ${esc(x.type)}</span></div><div class="muted">${esc(x.date||"")}　¥${Number(x.cost||0).toLocaleString()}</div>${castle}${templeShrine?`<div class="muted">${templeShrine}</div>`:""}${x.memo?`<p>${esc(x.memo)}</p>`:""}${photos.length?`<div class="photo-gallery">${photos.map((src,i)=>`<img class="photo" src="${src}" alt="${esc(x.place)}の写真${i+1}">`).join("")}</div>`:""}<div class="edit-actions"><button type="button" data-edit-id="${x.id}">✏️ 編集</button><button type="button" class="secondary danger" data-delete-id="${x.id}">🗑️ 削除</button></div></div>`;
   }).join(""):`<p class="muted">${q?"検索条件に一致する記録がありません。":"まだ記録がありません。下の「➕」から追加してください。"}</p>`;
 }
 function exportData(){

@@ -52,6 +52,16 @@ textarea{min-height:90px;resize:vertical}.row{display:grid;grid-template-columns
 }
 @media(max-width:380px){.stat{height:101px}.stat .name{font-size:9px}.stat .num{font-size:22px}.stat .unit{font-size:8px}}
 </style>
+
+<style id="tabi-log-photo-map-fix">
+#tl-photo-viewer{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:2147483000;display:none;align-items:center;justify-content:center;touch-action:pan-y}
+#tl-photo-viewer .tlpv-img{max-width:94vw;max-height:82vh;object-fit:contain;user-select:none;-webkit-user-drag:none;border-radius:8px}
+#tl-photo-viewer .tlpv-close{position:absolute;right:14px;top:calc(12px + env(safe-area-inset-top));z-index:3;width:46px;height:46px;border:0;border-radius:50%;background:#fff;color:#222;font-size:30px;line-height:42px}
+#tl-photo-viewer .tlpv-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:46px;height:58px;border:0;border-radius:14px;background:rgba(255,255,255,.82);font-size:34px}
+#tl-photo-viewer .tlpv-prev{left:8px}.tlpv-next{right:8px}
+#tl-photo-viewer .tlpv-count{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#fff;font-size:16px;text-shadow:0 1px 4px #000}
+.tl-map-close{position:fixed;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:2147482000;padding:10px 16px;border:0;border-radius:14px;background:#fff;font-size:16px;box-shadow:0 2px 12px rgba(0,0,0,.2);display:none}
+</style>
 </head>
 <body>
 <div class="app">
@@ -217,7 +227,115 @@ async function openDetail(id){const r=records.find(x=>x.id===id);if(!r)return;de
 function closeDetail(){$('detailModal').classList.remove('show');detailId=null}
 function detailEdit(){if(detailId)editRecord(detailId)}
 async function deleteRecord(){if(!detailId)return;const r=records.find(x=>x.id===detailId);if(!r)return;if(!confirm('「'+r.title+'」を削除しますか？'))return;for(const id of (r.photos||[]))await delPhoto(id);records=records.filter(x=>x.id!==detailId);db();closeDetail();update();alert('削除しました。')}
-function viewPhoto(src){const w=window.open();if(w){w.document.write('<title>旅ログ写真</title><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;background:#111"><img src="'+src+'" style="display:block;max-width:100%;height:auto;margin:auto"></body>');w.document.close()}}
+function viewPhoto(src){const w=window.open();if(w){w.document.write('<title>旅ログ写真</title><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;background:#111"><img src="'+src+'" style="display:block;max-width:100%;height:auto;margin:auto">
+<script id="tabi-log-photo-map-fix-js">
+(function(){
+  let photos=[], idx=0, photoOpen=false, photoHistory=false, mapReturn=null;
+
+  function viewer(){
+    let v=document.getElementById('tl-photo-viewer');
+    if(v) return v;
+    v=document.createElement('div'); v.id='tl-photo-viewer';
+    v.innerHTML='<button class="tlpv-close" type="button" aria-label="写真を閉じる">×</button>'+
+      '<button class="tlpv-nav tlpv-prev" type="button" aria-label="前の写真">‹</button>'+
+      '<img class="tlpv-img" alt="旅ログ写真">'+
+      '<button class="tlpv-nav tlpv-next" type="button" aria-label="次の写真">›</button>'+
+      '<div class="tlpv-count"></div>';
+    document.body.appendChild(v);
+    v.querySelector('.tlpv-close').onclick=closePhoto;
+    v.querySelector('.tlpv-prev').onclick=()=>move(-1);
+    v.querySelector('.tlpv-next').onclick=()=>move(1);
+    let sx=0,sy=0;
+    v.addEventListener('touchstart',e=>{if(e.touches.length===1){sx=e.touches[0].clientX;sy=e.touches[0].clientY;}},{passive:true});
+    v.addEventListener('touchend',e=>{
+      if(e.changedTouches.length!==1)return;
+      const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+      if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.15) move(dx<0?1:-1);
+    },{passive:true});
+    return v;
+  }
+  function render(){
+    const v=viewer(), img=v.querySelector('.tlpv-img');
+    img.src=photos[idx]||'';
+    v.querySelector('.tlpv-count').textContent=(idx+1)+' / '+photos.length;
+    const multi=photos.length>1;
+    v.querySelector('.tlpv-prev').style.display=multi?'block':'none';
+    v.querySelector('.tlpv-next').style.display=multi?'block':'none';
+  }
+  function openPhoto(list,start){
+    photos=(Array.isArray(list)?list:[list]).filter(Boolean);
+    if(!photos.length)return;
+    idx=Math.max(0,Math.min(Number(start)||0,photos.length-1));
+    viewer().style.display='flex'; document.body.style.overflow='hidden'; photoOpen=true;
+    render();
+    if(!history.state || !history.state.tlPhoto){history.pushState({tlPhoto:true},'');photoHistory=true;}
+  }
+  function closePhoto(){
+    const v=document.getElementById('tl-photo-viewer'); if(!v)return;
+    v.style.display='none'; document.body.style.overflow=''; photoOpen=false; photos=[];
+    if(photoHistory && history.state && history.state.tlPhoto){photoHistory=false;history.back();}
+  }
+  function move(n){if(photos.length<2)return;idx=(idx+n+photos.length)%photos.length;render();}
+  window.tlOpenPhotos=openPhoto;
+  window.tlClosePhotos=closePhoto;
+  window.addEventListener('popstate',function(){
+    const v=document.getElementById('tl-photo-viewer');
+    if(v && v.style.display!=='none'){v.style.display='none';document.body.style.overflow='';photoOpen=false;photos=[];photoHistory=false;}
+  });
+
+  // Preserve an existing viewPhoto(src) API while making it safe and same-page.
+  const oldView=window.viewPhoto;
+  window.viewPhoto=function(src){
+    if(Array.isArray(src)) return openPhoto(src,0);
+    if(typeof src==='string' && src) return openPhoto([src],0);
+    if(typeof oldView==='function') return oldView(src);
+  };
+
+  // Map close: create a visible button and try common existing close/navigation hooks.
+  function getActivePage(){
+    return document.querySelector('.page.active, [data-page].active, .screen.active');
+  }
+  function showReturn(){
+    const target=mapReturn;
+    if(typeof window.closeMap==='function' && window.closeMap!==closeMap) { try{window.closeMap();return;}catch(e){} }
+    if(typeof window.hideMap==='function') { try{window.hideMap();return;}catch(e){} }
+    if(target && typeof window.showPage==='function'){try{window.showPage(target);return;}catch(e){}}
+    if(typeof window.showScreen==='function' && target){try{window.showScreen(target);return;}catch(e){}}
+    const v=document.querySelector('#mapPage,.map-page,.map-screen,[id*="map"]');
+    if(v)v.style.display='none';
+  }
+  function closeMap(){
+    showReturn();
+    const b=document.getElementById('tl-map-close'); if(b)b.style.display='none';
+  }
+  window.tlCloseMap=closeMap;
+  function ensureMapButton(){
+    let b=document.getElementById('tl-map-close');
+    if(!b){b=document.createElement('button');b.id='tl-map-close';b.className='tl-map-close';b.type='button';b.textContent='× マップを閉じる';b.onclick=closeMap;document.body.appendChild(b);}
+    return b;
+  }
+  // Observe map-like containers becoming visible.
+  function checkMap(){
+    const b=ensureMapButton();
+    const candidates=[...document.querySelectorAll('[id*="map" i],.map,.map-page,.map-screen')];
+    let visible=null;
+    for(const e of candidates){const st=getComputedStyle(e);if(st.display!=='none'&&st.visibility!=='hidden'&&e.offsetWidth>0&&e.offsetHeight>0){visible=e;break;}}
+    if(visible){
+      if(!mapReturn) mapReturn=getActivePage();
+      b.style.display='block';
+    }else{b.style.display='none';mapReturn=null;}
+  }
+  const oldOpen=window.openMapPicker;
+  window.openMapPicker=function(){
+    mapReturn=getActivePage();
+    if(typeof oldOpen==='function') oldOpen.apply(this,arguments);
+    setTimeout(checkMap,100);
+  };
+  new MutationObserver(checkMap).observe(document.body,{subtree:true,attributes:true,attributeFilter:['style','class']});
+  setTimeout(checkMap,300);
+})();
+</script>
+</body>');w.document.close()}}
 
 async function backup(){try{const out={app:'旅ログ',version:5,exportedAt:new Date().toISOString(),records:[]};for(const r of records){const x={...r,photoData:[]};for(const id of (r.photos||[])){const p=await getPhoto(id);if(p)x.photoData.push({id,data:p})}out.records.push(x)}const blob=new Blob([JSON.stringify(out)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='旅ログバックアップ_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);alert('バックアップを書き出しました。')}catch{alert('バックアップの書き出しに失敗しました。')}}
 $('restore').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=async()=>{try{const x=JSON.parse(rd.result);if(!Array.isArray(x.records))throw 0;if(!confirm('現在の旅ログをバックアップ内容に置き換えます。よろしいですか？'))return;const staged=[];for(const rr of x.records){const r=normalize(rr);r.photos=[];for(const pd of (rr.photoData||[])){if(pd?.data){const pid=String(pd.id||makeId('p'));await putPhoto(pid,pd.data);r.photos.push(pid)}}if(!r.photos.length&&Array.isArray(rr.photos))r.photos=rr.photos.filter(v=>typeof v==='string'&&!v.startsWith('data:image/'));staged.push(r)}for(const r of records)for(const id of (r.photos||[]))await delPhoto(id);records=staged;db();update();alert('バックアップを復元しました。')}catch{alert('正しい旅ログバックアップではありません。元のデータは変更していません。')}finally{e.target.value=''}};rd.readAsText(f)})
